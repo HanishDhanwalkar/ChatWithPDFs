@@ -47,32 +47,30 @@ def get_embedds(file_path, filename):
 
     return vectors
 
+def start_chat(file_path):
+    if file_path[0] == '"':
+        file_path = file_path[1:]
+    if file_path[-1] == '"':
+        file_path = file_path[:-1]
+    file_name = file_path.split('\\')[-1]
+    file_name[:-4]
+                                
+    vectors = get_embedds(file_path, file_name)
 
-file_path = input('Enter pdf file path: ')
-# file_path =  urllib.parse.unquote(file_path)
-if file_path[0] == '"':
-    file_path = file_path[1:]
-if file_path[-1] == '"':
-    file_path = file_path[:-1]
-file_name = file_path.split('\\')[-1]
-file_name[:-4]
-                            
-vectors = get_embedds(file_path, file_name)
+    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+    qa = ConversationalRetrievalChain.from_llm(llm, retriever=vectors.as_retriever(), return_source_documents=True)
 
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
-qa = ConversationalRetrievalChain.from_llm(llm, retriever=vectors.as_retriever(), return_source_documents=True)
+    while True:
+        print('\n\n##############################')
+        query = input('Your question to pdf ("exit" to end): ')
 
-while True:
-    print('\n\n##############################')
-    query = input('Your question to pdf ("exit" to end): ')
+        if query.lower() == 'exit':
+            print('Thanks for talking....\n Exiting....')
+            break
+        
+        print('Generating.....')
+        chat_history = []
+        result = qa({"question": query, "chat_history": chat_history})
+        chat_history.append((query, result["answer"]))
 
-    if query.lower() == 'exit':
-        print('Thanks for talking....\n Exiting....')
-        break
-    
-    print('Generating.....')
-    chat_history = []
-    result = qa({"question": query, "chat_history": chat_history})
-    chat_history.append((query, result["answer"]))
-
-    print('Answer:\n', chat_history[-1][1])
+        print('Answer:\n', chat_history[-1][1])
