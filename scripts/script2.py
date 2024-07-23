@@ -1,6 +1,5 @@
 import warnings 
 warnings.filterwarnings('ignore')
-from dotenv import load_dotenv
 import os
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
